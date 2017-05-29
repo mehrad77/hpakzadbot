@@ -6,45 +6,96 @@ var token = '203511092:AAEMxqUW46BH-8jHViug6box5AkAYDDHCxs';
 var bot = new TelegramBot(token, { polling: true });
 console.log("Conected...");
 var ostan = ["آذربایجان شرقی","آذربایجان غربی","اصفهان","البرز","ایلام","بوشهر","تهران","چهارمحال و بختیاری","خراسان جنوبی","خراسان رضوی","خراسان شمالی","خوزستان","زنجان","سمنان","سیستان و بلوچستان","فارس","قزوین","قم","کردستان","کرمان","کرمانشاه","کهگیلویه و بویراحمد","گلستان","گیلان","لرستان","مازندران","مرکزی","هرمزگان","همدان","یزد"];
-var options = {
-		parse_mode:"HTML",
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [{ text: 'Some button text 1', callback_data: '1' }],
-          [{ text: 'Some button text 2', callback_data: '2' }],
-          [{ text: 'Some button text 3', callback_data: '3' }]
-        ]
-      })
-    };
+
 
 
 
 var replyKayboardMobile = {keyboard:[[{text: "بفرست",request_contact: true}]],"one_time_keyboard":true};
 var replyKayboardGender = {keyboard:[[{text: "مرد"}, {text: "زن"}]],"one_time_keyboard":true};
+
+
 // /((\/start|start|شروع))\b/
-bot.onText(/\/(get)/,  function (msg, match) {
-    var title = msg.text.substring(5);
+
+bot.onText(/((\/start|start|شروع))\b/,  function (msg, match) {
+    var intro = "به ربات رسمی هادی‌پاکزاد خوش‌آمدید. توسط این ربات می‌توانید ترانه‌ها و آهنگ‌ها و .... هادی پاکزاد را دریافت کنید. برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.";
+    bot.sendMessage(msg.chat.id, intro,mainKey);
+});
+
+
+bot.on('text',  function (msg, match) {
+    var keys =[]
+    var title = msg.text;//msg.text.substring(5);
     console.log(title);
-    var lyrc = searchObj(songs, title,""); out = []; //Always Clear out !
-    sent = ``;
+    var lyrc = searchObj(songs, title.toLowerCase(),""); out = []; //Always Clear out !
+    sent = `لطفا ترانه مورد نظر خود را انتخاب کنید.`;
     lyrc.forEach(function(entry) {
-        sent += '\n\n\n\n'+ hadi[entry];
+        //sent += '\n\n\n\n'+ hadi[entry];
+        keys.push( [{ text: songs[entry][1], callback_data: songs[entry][0] }] );
     });
+
+    if (keys.length <= 0){
+        sent = `‍نتیجه‌ای برای جست‌و‌جوی شما یافت نشد`;
+    }
+
+
+    var options = {
+		parse_mode:"HTML",
+        reply_markup: JSON.stringify({
+            inline_keyboard: keys
+        })
+    };
 	bot.sendMessage(msg.chat.id, sent, options);
 });
 
+
+bot.on('audio',  function (msg, match) {
+    	bot.sendMessage(msg.chat.id, msg.audio.file_id + "\n\n"+ msg.audio.title);
+});
+
+
+
+
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
-  const action = callbackQuery.data;
-  const msg = callbackQuery.message;
-  const opts = {
-    chat_id: msg.chat.id,
-    message_id: msg.message_id,
-  };
-  let text;
+    const action = callbackQuery.data;
+    const msg = callbackQuery.message;
+    const opts = {
+        chat_id: msg.chat.id,
+        message_id: msg.message_id,
+    };
+    if (/(get)\w+/g.test(action)){
+        let text = music[action.substr(3)];
+        bot.sendAudio(msg.chat.id, text);
+         
+    }
 
-    text = 'You hit button '+ action;
+    else if(/(btn_)\w+/g.test(action)){
+        let text = music[action.substr(4)];
+        switch(text) {
+            case "btn_albumfl":
+                //code block
+                break;
+            case "btn_albumlu":
+                //GlassyGuardcode block
+                break;
+            default:
+                console.log("God Damn ERORR!");
+        }
+    }
+    
+    else {
+        let text = hadi[action];
+        var rply = JSON.stringify({
+            inline_keyboard: [[{ text: "📥 دریافت آهنگ", callback_data: "get"+action }]]
+        });
+        bot.editMessageText(text, opts);
+        bot.editMessageReplyMarkup(rply,opts);
+       
+    }
+    
 
-  console.log(bot.editMessageText(text, opts));
+  
+
+   
 });
 
     
@@ -52,27 +103,29 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
 
 
 bot.on("inline_query", (query) => {
-
-    var lyrc = searchObj(songs, query.query.toLowerCase() ,""); out = []; //Always Clear out !
-    sent = [];
-    for (var i = 0;i < lyrc.length;i++){
-        var obg = {
-                    type: "article",
-                    id: "t"+i,
-                    thumb_url: 'http://bayanbox.ir/view/1099161085314589891/2012-Earth.jpg',
-                    title: songs[lyrc[i]][1],
-                    description: hadi[lyrc[i]].substring(0, 50)+"...",
-                    input_message_content: {
-                        message_text: hadi[lyrc[i]]
+    if (query.query != ""){
+        console.log(query);
+        var lyrc = searchObj(songs, query.query.toLowerCase() ,""); out = []; //Always Clear out !
+        sent = [];
+        lyrc.forEach(function(entry) {
+            var obg = {
+                        type: "article",
+                        id: entry,
+                        thumb_url: 'http://bayanbox.ir/view/1099161085314589891/2012-Earth.jpg',
+                        title: songs[entry][1],
+                        description: hadi[entry].substring(0, 100)+"...",
+                        input_message_content: {
+                            message_text: hadi[entry]
+                        }
                     }
-                }
-        sent.push(obg);
+            sent.push(obg);
+        });
+
+
+        
+
+    bot.answerInlineQuery(query.id, sent);
     }
-
-
-    
-
-  bot.answerInlineQuery(query.id, sent);
 });
 
 // function ask(chatID, askWhat) {
@@ -169,14 +222,20 @@ bot.on("inline_query", (query) => {
 
 var out = [];
 function searchObj(obj, query,motherObj) {
+    var preItm = "";
     for (var key in obj) {
         var value = obj[key];
         if (typeof value === 'object') {
             searchObj(value, query,value[0]);
         }
         if (value.includes(query)) {
-              out.push(motherObj);
-              console.log(query);
+            if (preItm != motherObj){
+                out.push(motherObj);
+                preItm = motherObj;
+            }
+
+            
+              //console.log(query);
         }
     }
     return out;
@@ -184,11 +243,11 @@ function searchObj(obj, query,motherObj) {
 
 
 
-
 var songs = {
+
     DarYad: ['DarYad',`دریاد`,`در یاد`,`daryad`,`dar yad`],
     MaraMibini: ['MaraMibini',`مرا می‌بینی`,`مرا میبینی`,`mara mibini`],
-    Man: ['Man',`من`,`i`,`man`],
+    Man: ['Man',`من`,`i`],
     Ashofte: ['Ashofte',`آشفته`,`اشفته`,`ashofte`],
     Daghigheha : ['Daghigheha',`دقیقه‌ها`,`daghigheha`,`daghighe ha`],
     GoleParpar : ['GoleParpar',`گل پرپر`,`gole parpar`,`پر پر`],
@@ -212,7 +271,7 @@ var songs = {
     OrdinaryPerson : ['OrdinaryPerson',`آدم معمولی`,`ادم`,`کلاس`,`ordinary personn`,`master`],
     Doctor: ['Doctor',`دکتر`,`dr`,`doctor`,`پزشک`],
 
-    BloodyMe : ['BloodyMe',`من لعنتی`,`من`,`خون`,`bloody`,`me`,`لعنتی`],
+    BloodyMe : ['BloodyMe',`من لعنتی`,`خون`,`bloody me`],
     WhatAboutMe : ['WhatAboutMe',`پس من چی`,`what about me`,`میشه`],
     DeathAngle : ['DeathAngle',`فرشته مرگ`,`death angle`],
     YouDidntHaveTo : ['YouDidntHaveTo',`لازم نبود`,`you didnt have to`,`لازم نبود بمیری`],
@@ -225,9 +284,9 @@ var songs = {
     MissMyself : ['MissMyself',`دلم برای خودم تنگه`,`miss myself`,`delam tange`],
     WhatDoesItMean : ['WhatDoesItMean',`یعنی چه`,`حافظ`,`what does it mean`],
     ColdAngel : ['ColdAngel',`فرشته سرد`,`cold angle`],
-    Postman: ['Postman',`پستچی`,`post`,`postman`],
-    And: ['And',`و`,`and`],
-    Scientist: ['Scientist',`دانشمند`,`scientist`,`افلاطون`,`انیشتین`,`اهم`,`نسبیت`,`ساعت`],
+    Postman: ['Postman',`پستچی`,`post`],
+    And: ['And',`و`],
+    Scientist: ['Scientist',`scientist`,`افلاطون`,`انیشتین`,`اهم`,`نسبیت`,`ساعت`],
     Ending: ['Ending',`پایان`,`ending`,`انهتا`,`آخر`],
 
     ArtificialChemistry: ['ArtificialChemistry',`شیمی مصنوعی`,`artificial chemistry`,`shimi masnoei`],
@@ -260,6 +319,222 @@ var songs = {
     GoodHappening: ['GoodHappening',`اتفاق خوب`,`good happening`],
     Revengemachine: ['Revengemachine',`ماشین انتقام`,`revenge machine`]
 }
+
+
+
+
+
+
+
+
+
+var music = {
+    bahar:`CQADBAADgQEAAq8LYVHqogj1ZZyQZAI`,
+
+    DarYad: `CQADBAADggEAAq8LYVEl1H5V2EYaGwI`,
+    MaraMibini: `CQADBAADgwEAAq8LYVGgaCF4qxjZBQI`,
+    Man: `CQADBAADhQEAAq8LYVGWcxLSmZeb6wI`,
+    Ashofte: `CQADBAADhgEAAq8LYVFJKHSx4sVVIgI`,
+    Daghigheha : `CQADBAADiAEAAq8LYVGmydbWWwkMiQI`,
+    GoleParpar : `CQADBAADhwEAAq8LYVGsQaNKnXwyggI`,
+    SafheyeAkhar:  `CQADBAADiQEAAq8LYVFv7kMvOs9B8gI`,
+
+    Adamahani : `CQADBAADigEAAq8LYVGZOdY_NEAKgwI`,
+    vasemanyavaseona: `CQADBAADiwEAAq8LYVFIYLvIU_5W0AI`,
+    ShesmyMom : `CQADBAADjAEAAq8LYVGm-aApcsfjMwI`,
+    Ghanoon: `CQADBAADjQEAAq8LYVEcwoA_Y1A4eQI`,
+    Afaterisheh : `CQADBAADjgEAAq8LYVGbdqDLPT1cdgI`,
+    Zendegizirezamin : `CQADBAADjwEAAq8LYVFj3ihIimaaHQI`,
+    Zendaneshishei: `CQADBAADkAEAAq8LYVGVgcf-SO9mNgI`,
+    Extacy: `CQADBAADkQEAAq8LYVGqcgsf7wzpFQI`,
+
+    TheresNothing: `CQADBAADkgEAAq8LYVGQd8fCu3VI6gI`,
+    Dark: `CQADBAADkwEAAq8LYVGb5Zh3ToZtUQI`,
+    Book: `CQADBAADlAEAAq8LYVGCIjf6W_R_zgI`,
+    Redline: `CQADBAADlQEAAq8LYVEFIEWAhh00VQI`,
+    MissYourFace : `CQADBAADlgEAAq8LYVGxwM6HbTcyqAI`,
+    GlassyGuard : `CQADBAADlwEAAq8LYVHPZeISkqg57QI`,
+    OrdinaryPerson : `CQADBAADmAEAAq8LYVELNu14gKSxjAI`,
+    Doctor: `CQADBAADmQEAAq8LYVH3UO6LEVx7yQI`,
+
+    BloodyMe : `CQADBAADmgEAAq8LYVHdBHx-R8QBLQI`,
+    WhatAboutMe : `CQADBAADmwEAAq8LYVFP11CA5OsQFgI`,
+    DeathAngle : `CQADBAADnAEAAq8LYVEj1Xe9t1THZQI`,
+    YouDidntHaveTo : `CQADBAADnQEAAq8LYVGx13KZZpwORwI`,
+    Earth: `CQADBAADngEAAq8LYVHkR0t6i5Hu_AI`,
+    Chess: `CQADBAADnwEAAq8LYVFj8Nou`,
+    FascinatingFlower : `CQADBAADoAEAAq8LYVEgRmkCGLMEGAI`,
+    Sepehr: `CQADBAADoQEAAq8LYVFS3O4PQXlVrwI`,
+
+    TheGun : `CQADBAADwQEAAq8LYVFOmANx4OT99AI`,
+    MissMyself : `CQADBAADwgEAAq8LYVHr4mWy8pHslQI`,
+    WhatDoesItMean : `CQADBAADwwEAAq8LYVHCbypjXYwuzAI`,
+    ColdAngel : `CQADBAADxAEAAq8LYVH-TAYFG-A0nwI`,
+    Postman: `CQADBAADxQEAAq8LYVEylpVbUZ-JnQI`,
+    And: `CQADBAADxgEAAq8LYVGalM9h1SS-DQI`,
+    Scientist: `CQADBAADyAEAAq8LYVFG1eMJQS426AI`,
+    Ending: `CQADBAADyQEAAq8LYVG53fyY9Rky-QI`,
+
+    ArtificialChemistry: `CQADBAADsgEAAq8LYVGqnI3Aw5VLKgI`,
+    CommunicationWithTheDeaf: `CQADBAADtAEAAq8LYVFnfBdUs_guIwI`,
+    YellowHarmony: `CQADBAADtQEAAq8LYVHLpyoM62q0WQI`,
+    ButtonOfDoom: `CQADBAADtgEAAq8LYVE4bLp_S0Iw`,
+    UnderneathTheOcean: `CQADBAADtwEAAq8LYVHhsODIr_ShOwI`,
+    People: `CQADBAADuAEAAq8LYVE5O4Ikz1mQbwI`,
+    FreeSpirit: `CQADBAADuQEAAq8LYVFybvmyIl9HZQI`,
+    NaturesGuilt: `CQADBAADuwEAAq8LYVEGRE_4E9NNbAI`,
+
+    FinalRun: `CQADBAAD0wEAAq8LYVHYIXd40CjaogI`,
+    ONegative: `CQADBAAD2QEAAq8LYVEjnwsRh2QcBwI`,
+    Eavesdrop: `CQADBAAD0AEAAq8LYVGhYISi82ek1AI`,
+    Juggle: `CQADBAAD1wEAAq8LYVEH9WWay0jNkQI`,
+    PackedLife: `CQADBAAD2gEAAq8LYVEIt_Qukz3mVQI`,
+    HazeToCelerity: `CQADBAAD1gEAAq8LYVF0w6dtSm0Q0AI`,
+    Verticalcemetry: `CQADBAAD3gEAAq8LYVFTMU8KsemO_wI`,
+    TheOneILovedToBe: `CQADBAAD3QEAAq8LYVEokldlTiWA2wI`,
+    WhereIamFrom: `CQADBAAD3wEAAq8LYVHeXmUm_2O7bAI`,
+
+    Sib: ``,
+    Hanozam: ``,
+    DesertRose: ``,
+    GreenRobans: ``,
+    NothingWillGetBetter: `CQADBAADwAEAAq8LYVHQwbmDsaADuAI`,
+    BlackRose: `CQADBAADvAEAAq8LYVFv2xLUEaBumAI`,
+    MercurialFountains: `CQADBAADvQEAAq8LYVHL0-aLc4ELGAI`,
+    Xanax: `CQADBAADvgEAAq8LYVGSTyL-wMKg0wI`,
+    GoodHappening: `CQADBAADvwEAAq8LYVEXd5XiArZzJgI`,
+    Revengemachine: ``,
+
+    strike:`CQADBAAD2wEAAq8LYVG4IOtfIkfglgI`
+}
+
+
+
+
+
+    var mainKey = {
+		parse_mode:"HTML",
+        reply_markup: JSON.stringify({
+            inline_keyboard: [
+                [
+                    { text: "سرزمین وحشت", callback_data: "btn_albumfl" },
+                    { text: "زندگی زیر زمین", callback_data: "btn_albumlu" }
+                ],[
+                    { text: "دکتر", callback_data: "btn_albumdr" },
+                    { text: "افلاطون", callback_data: "btn_albumaf" }
+                ],[
+                    { text: "For Four", callback_data: "btn_albumff" },
+                    { text: "ارتباط با کرها", callback_data: "btn_albumcwd" }
+                ],[
+                    { text: "گورستان ایستاده", callback_data: "btn_albumvc" }
+                ],[
+                    { text: "فول آرشیو", callback_data: "btn_full" },
+                    { text: "آثار متنی", callback_data: "btn_storis" }
+                ]
+            ]
+        })
+    };
+
+    var flKey = {
+		parse_mode:"HTML",
+        reply_markup: JSON.stringify({
+            inline_keyboard: [
+                [
+                    { text: "۱ بهار", callback_data: "getbahar" },
+                    { text: "۲ دریاد", callback_data: "getDarYad" }
+                ],[
+                    { text: "۳ مرا می‌بینی", callback_data: "getMaraMibini" },
+                    { text: "۴ من", callback_data: "getMan" }
+                ],[
+                    { text: "۵ آشفته", callback_data: "getAshofte" },
+                    { text: "۶ دقیقه‌ها", callback_data: "getDaghigheha" }
+                ],[
+                    { text: "۷ گل پرپر", callback_data: "getGoleParpar" },
+                    { text: "۸ صفحه آخر", callback_data: "getSafheyeAkhar" }
+                ],[
+                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                ]
+            ]
+        })
+    };
+
+    var luKey = {
+        parse_mode:"HTML",
+        reply_markup: JSON.stringify({
+            inline_keyboard: [
+                [
+                    { text: "۱ آدم‌آهنی", callback_data: "getAdamahani" },
+                    { text: "۲ واسه من یا واسه‌ اونا", callback_data: "getvasemanyavaseona" }
+                ],[
+                    { text: "۳ She's My Mom", callback_data: "getShesmyMom" },
+                    { text: "۴ قانون", callback_data: "getGhanoon" }
+                ],[
+                    { text: "۵ آُفت ریشه", callback_data: "getAfaterisheh" },
+                    { text: "۶ زندگی زیر زمین", callback_data: "getZendegizirezamin" }
+                ],[
+                    { text: "۷ زندان شیشه‌ای", callback_data: "getZendaneshishei" },
+                    { text: "۸ اکستازی", callback_data: "getExtacy" }
+                ],[
+                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                ]
+            ]
+        })
+    };
+
+    var drKey = {
+        parse_mode:"HTML",
+        reply_markup: JSON.stringify({
+            inline_keyboard: [
+                [
+                    { text: "۱ چیزی نیست", callback_data: "getTheresNothing" },
+                    { text: "۲ تاریک", callback_data: "getDark" }
+                ],[
+                    { text: "۳ کتاب", callback_data: "getBook" },
+                    { text: "۴ خط قرمز", callback_data: "getRedline" }
+                ],[
+                    { text: "۵ دلم برای صورتت تنگ شده", callback_data: "getMissYourFace" },
+                    { text: "۶ پیله‌های شیشه‌ای", callback_data: "getGlassyGuard" }
+                ],[
+                    { text: "۷ آدم معمولی", callback_data: "getOrdinaryPerson" },
+                    { text: "۸ دکتر", callback_data: "getDoctor" }
+                ],[
+                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                ]
+            ]
+        })
+    };
+    var afKey = {
+        parse_mode:"HTML",
+        reply_markup: JSON.stringify({
+            inline_keyboard: [
+                [
+                    { text: "۱ من لعنتی", callback_data: "getBloodyMe" },
+                    { text: "۲ پس من چی", callback_data: "getWhatAboutMe" }
+                ],[
+                    { text: "۳ فرشته مرگ", callback_data: "getDeathAngle" },
+                    { text: "۴ لازم نبود", callback_data: "getYouDidntHaveTo" }
+                ],[
+                    { text: "۵ زمین", callback_data: "getEarth" },
+                    { text: "۶ شطرنج", callback_data: "getChess" }
+                ],[
+                    { text: "۷ گل دلفریب", callback_data: "getFascinatingFlower" },
+                    { text: "۸ سپهر", callback_data: "getSepehr" }
+                ],[
+                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                ]
+            ]
+        })
+    };
+    //var cwdKey = {
+    //var vcKey = {
+
+
+
+
+
+
+    
+
 
 
 
