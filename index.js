@@ -15,9 +15,8 @@ var replyKayboardGender = {keyboard:[[{text: "مرد"}, {text: "زن"}]],"one_ti
 
 
 // /((\/start|start|شروع))\b/
-
+var intro = "به ربات رسمی هادی‌پاکزاد خوش‌آمدید. توسط این ربات می‌توانید ترانه‌ها و آهنگ‌ها و .... هادی پاکزاد را دریافت کنید. برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.";
 bot.onText(/((\/start|start|شروع))\b/,  function (msg, match) {
-    var intro = "به ربات رسمی هادی‌پاکزاد خوش‌آمدید. توسط این ربات می‌توانید ترانه‌ها و آهنگ‌ها و .... هادی پاکزاد را دریافت کنید. برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.";
     bot.sendMessage(msg.chat.id, intro,mainKey);
 });
 
@@ -69,13 +68,16 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     }
 
     else if(/(btn_)\w+/g.test(action)){
-        let text = music[action.substr(4)];
+        let text = action.substr(4);
+        console.log(text);
         switch(text) {
-            case "btn_albumfl":
-                //code block
+            case "albumfl":
+                bot.editMessageReplyMarkup(flKey,opts);
+                bot.editMessageText("test", opts);
                 break;
-            case "btn_albumlu":
-                //GlassyGuardcode block
+            case "main_Key":
+                bot.editMessageReplyMarkup(main_Key,opts);
+                bot.editMessageText(intro, opts);
                 break;
             default:
                 console.log("God Damn ERORR!");
@@ -435,9 +437,27 @@ var music = {
         })
     };
 
+    var main_Key = {
+            inline_keyboard: [
+                [
+                    { text: "سرزمین وحشت", callback_data: "btn_albumfl" },
+                    { text: "زندگی زیر زمین", callback_data: "btn_albumlu" }
+                ],[
+                    { text: "دکتر", callback_data: "btn_albumdr" },
+                    { text: "افلاطون", callback_data: "btn_albumaf" }
+                ],[
+                    { text: "For Four", callback_data: "btn_albumff" },
+                    { text: "ارتباط با کرها", callback_data: "btn_albumcwd" }
+                ],[
+                    { text: "گورستان ایستاده", callback_data: "btn_albumvc" }
+                ],[
+                    { text: "فول آرشیو", callback_data: "btn_full" },
+                    { text: "آثار متنی", callback_data: "btn_storis" }
+                ]
+            ]
+    };
+
     var flKey = {
-		parse_mode:"HTML",
-        reply_markup: JSON.stringify({
             inline_keyboard: [
                 [
                     { text: "۱ بهار", callback_data: "getbahar" },
@@ -452,15 +472,12 @@ var music = {
                     { text: "۷ گل پرپر", callback_data: "getGoleParpar" },
                     { text: "۸ صفحه آخر", callback_data: "getSafheyeAkhar" }
                 ],[
-                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                    { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
             ]
-        })
     };
 
     var luKey = {
-        parse_mode:"HTML",
-        reply_markup: JSON.stringify({
             inline_keyboard: [
                 [
                     { text: "۱ آدم‌آهنی", callback_data: "getAdamahani" },
@@ -475,15 +492,12 @@ var music = {
                     { text: "۷ زندان شیشه‌ای", callback_data: "getZendaneshishei" },
                     { text: "۸ اکستازی", callback_data: "getExtacy" }
                 ],[
-                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                    { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
             ]
-        })
     };
 
     var drKey = {
-        parse_mode:"HTML",
-        reply_markup: JSON.stringify({
             inline_keyboard: [
                 [
                     { text: "۱ چیزی نیست", callback_data: "getTheresNothing" },
@@ -498,14 +512,11 @@ var music = {
                     { text: "۷ آدم معمولی", callback_data: "getOrdinaryPerson" },
                     { text: "۸ دکتر", callback_data: "getDoctor" }
                 ],[
-                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                    { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
             ]
-        })
     };
     var afKey = {
-        parse_mode:"HTML",
-        reply_markup: JSON.stringify({
             inline_keyboard: [
                 [
                     { text: "۱ من لعنتی", callback_data: "getBloodyMe" },
@@ -520,10 +531,9 @@ var music = {
                     { text: "۷ گل دلفریب", callback_data: "getFascinatingFlower" },
                     { text: "۸ سپهر", callback_data: "getSepehr" }
                 ],[
-                    { text: "🔙 بازگشت", callback_data: "btn_main" }
+                    { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
             ]
-        })
     };
     //var cwdKey = {
     //var vcKey = {
