@@ -43,7 +43,7 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
 
     text = 'You hit button '+ action;
 
-  bot.editMessageText(text, opts);
+  console.log(bot.editMessageText(text, opts));
 });
 
     
