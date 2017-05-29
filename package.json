@@ -1,11 +1,8 @@
 {
-  "name": "telesanj",
+  "name": "hpakzadbot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "mongoose": "^4.8.4"
-  },
   "devDependencies": {
     "lodash": "^4.17.4",
     "node-telegram-bot-api": "^0.27.0",
