@@ -22,9 +22,10 @@ var options = {
 var replyKayboardMobile = {keyboard:[[{text: "بفرست",request_contact: true}]],"one_time_keyboard":true};
 var replyKayboardGender = {keyboard:[[{text: "مرد"}, {text: "زن"}]],"one_time_keyboard":true};
 // /((\/start|start|شروع))\b/
-bot.on('text', function (msg, match) {
-    console.log(msg.text);
-    var lyrc = searchObj(songs, msg.text,""); out = []; //Always Clear out !
+bot.onText(/\/(get)/,  function (msg, match) {
+    var title = msg.text.substring(5);
+    console.log(title);
+    var lyrc = searchObj(songs, title,""); out = []; //Always Clear out !
     sent = ``;
     lyrc.forEach(function(entry) {
         sent += '\n\n\n\n'+ hadi[entry];
@@ -185,68 +186,68 @@ function searchObj(obj, query,motherObj) {
 
 
 var songs = {
-    DarYad: ['DarYad',`دریاد`,`در یاد`,`daryad`,`dar yad`,`dar`,`yad`],
-    MaraMibini: ['MaraMibini',`مرا می‌بینی`,`مرا`,`مرا میبینی`,`mara`,`mara mibini`],
+    DarYad: ['DarYad',`دریاد`,`در یاد`,`daryad`,`dar yad`],
+    MaraMibini: ['MaraMibini',`مرا می‌بینی`,`مرا میبینی`,`mara mibini`],
     Man: ['Man',`من`,`i`,`man`],
     Ashofte: ['Ashofte',`آشفته`,`اشفته`,`ashofte`],
-    Daghigheha : ['Daghigheha',`دقیقه‌ها`,`دقیقه`,`daghighe`,`daghigheha`,`daghighe ha`],
-    GoleParpar : ['GoleParpar',`گل پرپر`,`gole parpar`,`gol e par par`,`پر پر`,`گل`],
-    SafheyeAkhar: ['SafheyeAkhar',`صفحه آخر`,`آخر`,`صفحه`,`safhe`,`akhar`,`safheh akhar`],
+    Daghigheha : ['Daghigheha',`دقیقه‌ها`,`daghigheha`,`daghighe ha`],
+    GoleParpar : ['GoleParpar',`گل پرپر`,`gole parpar`,`پر پر`],
+    SafheyeAkhar: ['SafheyeAkhar',`صفحه آخر`,`safheh akhar`],
 
-    Adamahani : ['Adamahani',`آدم`,`آهنی`,`آهن`,`adam`,`ahan`,`adam ahani`],
-    vasemanyavaseona: ['vasemanyavaseona',`واسه من یا واسه اونا؟`,`من`,`اون`,`vase`,`man`,`ona`,`واسه`],
-    ShesmyMom : ['ShesmyMom',`She's My Mom`,`my`,`mom`,`مادر`,`she`],
+    Adamahani : ['Adamahani',`آدم آهنی`,`adam ahani`],
+    vasemanyavaseona: ['vasemanyavaseona',`واسه من یا واسه اونا؟`,`vase man ya vaseh ona`],
+    ShesmyMom : ['ShesmyMom',`She's My Mom`,`my mom she`],
     Ghanoon: ['Ghanoon',`قانون`,`law`,`ghanoon`,`ghanon`],
-    Afaterisheh : ['Afaterisheh',`آفت`,`ریشه`,`افت`,`afat`,`rishe`],
-    Zendegizirezamin : ['Zendegizirezamin',`زندگی`,`زیر`,`زمین`,`living`,`underground`],
-    Zendaneshishei: ['Zendaneshishei',`زندان`,`شیشه`,`glass`],
+    Afaterisheh : ['Afaterisheh',`آفت ریشه`,`افت`,`afat e rishe`],
+    Zendegizirezamin : ['Zendegizirezamin',`زندگی زیر زمین`,`living`,`underground`],
+    Zendaneshishei: ['Zendaneshishei',`زندان شیشه‌ای`,`glass`],
     Extacy: ['Extacy',`اکستازی`,`extacy`],
 
     TheresNothing: ['TheresNothing',`چیزی نیست`,`چیزی`,`نیست`,`nothing`],
     Dark: ['Dark',`تاریک`,`dark`,`tarik`],
     Book: ['Book',`کتاب`,`book`],
-    Redline:['Redline',`خط قرمز`,`خط`,`قرمز`,`red`,`line`,`redline`],
-    MissYourFace : ['MissYourFace',`دلم برای صورتت تنگ شده`,`دلم`,`صورتت`,`تنگ`,`miss`,`your`,`face`],
-    GlassyGuard : ['GlassyGuard',`پیله‌های شیشه‌ای`,`glassyguard`,`glassy`,`guard`,`پیله`,`شیشه`,`glass`],
-    OrdinaryPerson : ['OrdinaryPerson',`آدم معمولی`,`آدم`,`ادم`,`معمولی`,`کلاس`,`ordinary`,`person`,`master`],
+    Redline:['Redline',`خط قرمز`,`red line`],
+    MissYourFace : ['MissYourFace',`دلم برای صورتت تنگ شده`,`miss your face`],
+    GlassyGuard : ['GlassyGuard',`پیله‌های شیشه‌ای`,`glassy guard`,`glassy`,],
+    OrdinaryPerson : ['OrdinaryPerson',`آدم معمولی`,`ادم`,`کلاس`,`ordinary personn`,`master`],
     Doctor: ['Doctor',`دکتر`,`dr`,`doctor`,`پزشک`],
 
     BloodyMe : ['BloodyMe',`من لعنتی`,`من`,`خون`,`bloody`,`me`,`لعنتی`],
-    WhatAboutMe : ['WhatAboutMe',`پس من چی`,`what`,`About`,`me`,`میشه`,`سهم`,`من`,`چی`],
-    DeathAngle : ['DeathAngle',`فرشته مرگ`,`فرشته`,`مرگ`,`death`,`angle`],
-    YouDidntHaveTo : ['YouDidntHaveTo',`لازم نبود`,`have`,`you`,`بمیری`,`لازم`,`نبود`],
+    WhatAboutMe : ['WhatAboutMe',`پس من چی`,`what about me`,`میشه`],
+    DeathAngle : ['DeathAngle',`فرشته مرگ`,`death angle`],
+    YouDidntHaveTo : ['YouDidntHaveTo',`لازم نبود`,`you didnt have to`,`لازم نبود بمیری`],
     Earth: ['Earth',`زمین`,`earth`,`افلاطون`,`خاک`],
     Chess: ['Chess',`شطرنج`,`شترنج`,`chess`,`سیزده`,`بازی`,`game`],
-    FascinatingFlower : ['FascinatingFlower',`'گل دلفریب`,`گل`,`دلفریب`,`fascinating`,`flower`,`باغ`,`gol`,`gole`,`gole delfarib`],
-    Sepehr: ['Sepehr',`سپهر`,`sepehr`,`دوست`,`spehr`],
+    FascinatingFlower : ['FascinatingFlower',`'گل دلفریب`,`fascinating flower`,`باغ`,`gole delfarib`],
+    Sepehr: ['Sepehr',`سپهر`,`sepehr`],
 
     TheGun : ['TheGun',`اسلحه`,`تفنگ`,`gun`,`the`,`تیر`,`شکار`],
-    MissMyself : ['MissMyself',`دلم برای خودم تنگه`,`miss`,`myself`,`تنگ`,`دلم`,`خودم`,`تنگه`,`برای`,`delam`,`delam tange`],
-    WhatDoesItMean : ['WhatDoesItMean',`یعنی جه`,`یعنی`,`چه`,`حافظ`,`what`,`does`,`mean`],
-    ColdAngel : ['ColdAngel',`فرشته سرد`,`سرد`,`cold`,`angle`,`فرشته`],
-    Postman: ['Postman',`پستچی`,`post`,`postman`,`پست`],
+    MissMyself : ['MissMyself',`دلم برای خودم تنگه`,`miss myself`,`delam tange`],
+    WhatDoesItMean : ['WhatDoesItMean',`یعنی چه`,`حافظ`,`what does it mean`],
+    ColdAngel : ['ColdAngel',`فرشته سرد`,`cold angle`],
+    Postman: ['Postman',`پستچی`,`post`,`postman`],
     And: ['And',`و`,`and`],
     Scientist: ['Scientist',`دانشمند`,`scientist`,`افلاطون`,`انیشتین`,`اهم`,`نسبیت`,`ساعت`],
-    Ending: ['Ending',`پایان`,`ending`,`انهتا`,`آخر`,`end`,`اندینگ`],
+    Ending: ['Ending',`پایان`,`ending`,`انهتا`,`آخر`],
 
-    ArtificialChemistry: ['ArtificialChemistry',`شیمی مصنوعی`,`artificial`,`chemistry`,`شیمی`,`مصنوعی`,`shimi`,`shimi masnoei`],
-    CommunicationWithTheDeaf: ['CommunicationWithTheDeaf',`ارتباط با کرها`,`کر`,`ارتباط`,`communication`,`deaf`,`کرها`,`ertebat ba karha`,`ertebat`],
-    YellowHarmony: ['YellowHarmony',`هارمونی زرد`,`yellow`,`harmony`,`هارمونی`,`yellow harmony`],
-    ButtonOfDoom: ['ButtonOfDoom',`کلید انفجار`,`انفجار`,`button`,`دکمه`,`doom`,`دکتر`,`کلید`,`button of doom`,`دکمه انفجار`],
-    UnderneathTheOcean: ['UnderneathTheOcean',`اعماق اوقیانوس`,`ocean`,`underneath`,`اوقیانوس`,`اعماق`,`اقیانوس`,`دریا`,`انزوا`,`اوقیانوس انزوا`],
-    People: ['People',`مردم`,`people`,`اجتماع`,`مرد`,`جامعه`,`م`],
-    FreeSpirit: ['FreeSpirit',`روح آزاد`,`روح`,`آزاد`,`ازاد`,`عشق`,`سرد`,`free`,`spirit`,`free spirit`],
-    NaturesGuilt: ['NaturesGuilt',`'گناه طبیعت`,`گناه`,`طبیعت`,`natures`,`guilt`,`natures guilt`,`gonah`,`gonah tabiat`],
+    ArtificialChemistry: ['ArtificialChemistry',`شیمی مصنوعی`,`artificial chemistry`,`shimi masnoei`],
+    CommunicationWithTheDeaf: ['CommunicationWithTheDeaf',`ارتباط با کرها`,`communication with the deaf`,],
+    YellowHarmony: ['YellowHarmony',`هارمونی زرد`,`yellow harmony`],
+    ButtonOfDoom: ['ButtonOfDoom',`کلید انفجار`,`دکتر`,`button of doom`,`دکمه انفجار`],
+    UnderneathTheOcean: ['UnderneathTheOcean',`اعماق اوقیانوس`,`underneath the ocean`,`اقیانوس`,`دریا`,`انزوا`],
+    People: ['People',`مردم`,`people`,`اجتماع`],
+    FreeSpirit: ['FreeSpirit',`روح آزاد`,`ازاد`,`عشق`,`سرد`,`free spirit`],
+    NaturesGuilt: ['NaturesGuilt',`گناه طبیعت`,`natures guilt`,`gonah tabiat`],
 
-    FinalRun: ['FinalRun',`فرار آخر`,`final`,`run`,`آخر`,`فرار`,`یخ`,`سرد`,`فرار آخرم`,`فرار اخرم`,`final run`,`farar akhar`,`farar`],
-    ONegative: ['ONegative',`اُ منفی`,`او`,`منفی`,`o`,`negative`,`خون`,`او نگتیو`,`تنها`,`o negative`],
+    FinalRun: ['FinalRun',`فرار آخر`,`final run`,`یخ سرد`,`farar akhar`],
+    ONegative: ['ONegative',`اُ منفی`,`او`,`او نگتیو`,`تنها`,`o negative`],
     Eavesdrop: ['Eavesdrop',`شنود`,`eavesdrop`,`shonood`,`shonod`],
     Juggle: ['Juggle',`شعبده`,`juggle`,`شوبده`,`shobade`,`شبده`],
-    PackedLife: ['PackedLife',`زندگی بسته‌ای`,`زندگی`,`بسته`,`packed`,`life`,`پاکت`,`جعبه`,`packed life`,`baste`,`zenegi`],
-    HazeToCelerity: ['HazeToCelerity',`مه تا وضوح`,`haze`,`celerity`,`مه`,`وضوح`,`تا`,`to`,`haze to celerity`],
-    Verticalcemetry: ['Verticalcemetry',`گورستان ایستاده`,`vertical`,`cemetry`,`گورستان`,`ایستاده`,`گور`,`قبر`],
-    TheOneILovedToBe: ['TheOneILovedToBe',`کسی که دوست داشتم باشم`,`The One I Loved To Be`,`کسی که`,`کسی`,`دوست`,`the one‍`],
-    WhereIamFrom: ['WhereIamFrom',`کجایی‌ام`,`کجایی`,`where`,`from`,`کجا`],
+    PackedLife: ['PackedLife',`زندگی بسته‌ای`,`packed life`,,`جعبه`],
+    HazeToCelerity: ['HazeToCelerity',`مه تا وضوح`,`haze to celerity`],
+    Verticalcemetry: ['Verticalcemetry',`گورستان ایستاده`,`vertical cemetry`],
+    TheOneILovedToBe: ['TheOneILovedToBe',`کسی که دوست داشتم باشم`,`The One I Loved To Be`],
+    WhereIamFrom: ['WhereIamFrom',`کجایی‌ام`,`where i am from`,`کجا`],
 
     Sib: ['Sib',`سیب`,`apple`],
     Hanozam: ['Hanozam',`هنوزم`,`هنوز`],
