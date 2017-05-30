@@ -4,7 +4,7 @@ var TelegramBot = require('node-telegram-bot-api');
 var token = '203511092:AAEMxqUW46BH-8jHViug6box5AkAYDDHCxs';
 // Change this to wenhook fastest as you can (‍‍‍~mehrad)
 var bot = new TelegramBot(token, { polling: true });
-console.log("Conected...");
+console.log("[...]Conected...");
 var ostan = ["آذربایجان شرقی","آذربایجان غربی","اصفهان","البرز","ایلام","بوشهر","تهران","چهارمحال و بختیاری","خراسان جنوبی","خراسان رضوی","خراسان شمالی","خوزستان","زنجان","سمنان","سیستان و بلوچستان","فارس","قزوین","قم","کردستان","کرمان","کرمانشاه","کهگیلویه و بویراحمد","گلستان","گیلان","لرستان","مازندران","مرکزی","هرمزگان","همدان","یزد"];
 
 
@@ -13,37 +13,36 @@ var ostan = ["آذربایجان شرقی","آذربایجان غربی","اصف
 var replyKayboardMobile = {keyboard:[[{text: "بفرست",request_contact: true}]],"one_time_keyboard":true};
 var replyKayboardGender = {keyboard:[[{text: "مرد"}, {text: "زن"}]],"one_time_keyboard":true};
 
-
-// /((\/start|start|شروع))\b/
 var intro = "به ربات رسمی هادی‌پاکزاد خوش‌آمدید. توسط این ربات می‌توانید ترانه‌ها و آهنگ‌ها و .... هادی پاکزاد را دریافت کنید. برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.";
 bot.onText(/((\/start|start|شروع))\b/,  function (msg, match) {
-    bot.sendMessage(msg.chat.id, intro,mainKey);
+    
 });
 
 
 bot.on('text',  function (msg, match) {
-    var keys =[]
-    var title = msg.text;//msg.text.substring(5);
-    console.log("[...][text]==> text: ",title);
-    var lyrc = searchObj(songs, title.toLowerCase(),""); out = []; //Always Clear out !
-    sent = `لطفا ترانه مورد نظر خود را انتخاب کنید.`;
-    lyrc.forEach(function(entry) {
-        //sent += '\n\n\n\n'+ hadi[entry];
-        keys.push( [{ text: songs[entry][1], callback_data: songs[entry][0] }] );
-    });
-
-    if (keys.length <= 0){
-        sent = `‍نتیجه‌ای برای جست‌و‌جوی شما یافت نشد`;
-    }
-
-
-    var options = {
-		parse_mode:"HTML",
-        reply_markup: JSON.stringify({
-            inline_keyboard: keys
-        })
-    };
-	bot.sendMessage(msg.chat.id, sent, options);
+    var title = msg.text;
+    
+        var keys =[]
+        console.log("["+msg.chat.fisrt_name+"][text]==> text: ",title);
+        var lyrc = searchObj(songs, title.toLowerCase(),""); out = []; //Always Clear out !
+        sent = `لطفا ترانه مورد نظر خود را انتخاب کنید.`;
+        lyrc.forEach(function(entry) {
+            //sent += '\n\n\n\n'+ hadi[entry];
+            keys.push( [{ text: songs[entry][1], callback_data: songs[entry][0] }] );
+        });
+        if(!(/((\/start|start|شروع))\b/.test(title))||keys.length <= 0){
+            sent = `‍نتیجه‌ای برای جست‌و‌جوی شما یافت نشد،برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.`;
+            bot.sendMessage(msg.chat.id, sent,mainKey);
+        }
+        else{
+            var options = {
+                parse_mode:"HTML",
+                reply_markup: JSON.stringify({
+                    inline_keyboard: keys
+                })
+            };
+            bot.sendMessage(msg.chat.id, sent, options);
+        }
 });
 
 
@@ -56,7 +55,7 @@ bot.on('audio',  function (msg, match) {
 
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
-    console.log("[...][callback_query]==> Action: ",action);
+    console.log("["+msg.chat.fisrt_name+"][callback_query]==> Action: ",action);
     const msg = callbackQuery.message;
     const opts = {
         chat_id: msg.chat.id,
@@ -77,7 +76,6 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
 
     else if(/(btn_)\w+/g.test(action)){
         text = action.substr(4);
-        console.log(text);
         switch(text) {
             case "albumfl":
                 //bot.editMessageText("آلبوم سرزمین وحشت", opts);
@@ -99,9 +97,9 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
                 //bot.editMessageText("آلبوم سرزمین وحشت", opts);
                 bot.editMessageReplyMarkup(ffKey,opts);
                 break;
-            case "albumcwt":
+            case "albumcwd":
                 //bot.editMessageText("آلبوم سرزمین وحشت", opts);
-                bot.editMessageReplyMarkup(ctwKey,opts);
+                bot.editMessageReplyMarkup(cwdKey,opts);
                 break;
             case "albumvc":
                 //bot.editMessageText("آلبوم سرزمین وحشت", opts);
@@ -122,7 +120,6 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     }
 
     else if (/(get_lyrics_)\w+/g.test(action)){
-        console.log("get lyric trigerd !")
         text = action.substr(11);
         sendLyric(text,opts);
         bot.answerCallbackQuery(callbackQuery.id, " ارسال شد.",false);
@@ -162,7 +159,7 @@ function sendEditLyric(songID,opts){
 
 bot.on("inline_query", (query) => {
     if (query.query != ""){
-        console.log("[...][inline_query]==> query: ",query.query);
+        console.log("["+msg.chat.fisrt_name+"][inline_query]==> query: ",query.query);
         var lyrc = searchObj(songs, query.query.toLowerCase() ,""); out = []; //Always Clear out !
         sent = [];
         lyrc.forEach(function(entry) {
@@ -484,9 +481,11 @@ var music = {
                     { text: "For Four", callback_data: "btn_albumff" },
                     { text: "ارتباط با کرها", callback_data: "btn_albumcwd" }
                 ],[
-                    { text: "گورستان ایستاده", callback_data: "btn_albumvc" }
+                    { text: "گورستان ایستاده", callback_data: "btn_albumvc" },
+                     { text: "تک‌ترانه‌ها", callback_data: "btn_albumsingle" }
                 ],[
-                    { text: "فول آرشیو", callback_data: "btn_full" },
+                    { text: "فول آرشیو", callback_data: "btn_full" }
+                ],[
                     { text: "آثار متنی", callback_data: "btn_storis" }
                 ]
             ]
@@ -508,7 +507,8 @@ var music = {
                     { text: "گورستان ایستاده", callback_data: "btn_albumvc" },
                     { text: "تک‌ترانه‌ها", callback_data: "btn_albumsingle" }
                 ],[
-                    { text: "فول آرشیو", callback_data: "btn_full" },
+                    { text: "فول آرشیو", callback_data: "btn_full" }
+                ],[
                     { text: "آثار متنی", callback_data: "btn_storis" }
                 ]
             ]
@@ -517,17 +517,17 @@ var music = {
     var flKey = {
             inline_keyboard: [
                 [
-                    { text: "۱ بهار", callback_data: "getbahar" },
-                    { text: "۲ دریاد", callback_data: "getDarYad" }
+                    { text: "۱ بهار", callback_data: "get_song_bahar" },
+                    { text: "۲ دریاد", callback_data: "get_song_DarYad" }
                 ],[
-                    { text: "۳ مرا می‌بینی", callback_data: "getMaraMibini" },
-                    { text: "۴ من", callback_data: "getMan" }
+                    { text: "۳ مرا می‌بینی", callback_data: "get_song_MaraMibini" },
+                    { text: "۴ من", callback_data: "get_song_Man" }
                 ],[
-                    { text: "۵ آشفته", callback_data: "getAshofte" },
-                    { text: "۶ دقیقه‌ها", callback_data: "getDaghigheha" }
+                    { text: "۵ آشفته", callback_data: "get_song_Ashofte" },
+                    { text: "۶ دقیقه‌ها", callback_data: "get_song_Daghigheha" }
                 ],[
-                    { text: "۷ گل پرپر", callback_data: "getGoleParpar" },
-                    { text: "۸ صفحه آخر", callback_data: "getSafheyeAkhar" }
+                    { text: "۷ گل پرپر", callback_data: "get_song_GoleParpar" },
+                    { text: "۸ صفحه آخر", callback_data: "get_song_SafheyeAkhar" }
                 ],[
                     { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
@@ -537,17 +537,17 @@ var music = {
     var luKey = {
             inline_keyboard: [
                 [
-                    { text: "۱ آدم‌آهنی", callback_data: "getAdamahani" },
-                    { text: "۲ واسه من یا واسه‌ اونا", callback_data: "getvasemanyavaseona" }
+                    { text: "۱ آدم‌آهنی", callback_data: "get_song_Adamahani" },
+                    { text: "۲ واسه من یا واسه‌ اونا", callback_data: "get_song_vasemanyavaseona" }
                 ],[
-                    { text: "۳ She's My Mom", callback_data: "getShesmyMom" },
-                    { text: "۴ قانون", callback_data: "getGhanoon" }
+                    { text: "۳ She's My Mom", callback_data: "get_song_ShesmyMom" },
+                    { text: "۴ قانون", callback_data: "get_song_Ghanoon" }
                 ],[
-                    { text: "۵ آُفت ریشه", callback_data: "getAfaterisheh" },
-                    { text: "۶ زندگی زیر زمین", callback_data: "getZendegizirezamin" }
+                    { text: "۵ آُفت ریشه", callback_data: "get_song_Afaterisheh" },
+                    { text: "۶ زندگی زیر زمین", callback_data: "get_song_Zendegizirezamin" }
                 ],[
-                    { text: "۷ زندان شیشه‌ای", callback_data: "getZendaneshishei" },
-                    { text: "۸ اکستازی", callback_data: "getExtacy" }
+                    { text: "۷ زندان شیشه‌ای", callback_data: "get_song_Zendaneshishei" },
+                    { text: "۸ اکستازی", callback_data: "get_song_Extacy" }
                 ],[
                     { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
@@ -557,17 +557,17 @@ var music = {
     var drKey = {
             inline_keyboard: [
                 [
-                    { text: "۱ چیزی نیست", callback_data: "getTheresNothing" },
-                    { text: "۲ تاریک", callback_data: "getDark" }
+                    { text: "۱ چیزی نیست", callback_data: "get_song_TheresNothing" },
+                    { text: "۲ تاریک", callback_data: "get_song_Dark" }
                 ],[
-                    { text: "۳ کتاب", callback_data: "getBook" },
-                    { text: "۴ خط قرمز", callback_data: "getRedline" }
+                    { text: "۳ کتاب", callback_data: "get_song_Book" },
+                    { text: "۴ خط قرمز", callback_data: "get_song_Redline" }
                 ],[
-                    { text: "۵ دلم برای صورتت تنگ شده", callback_data: "getMissYourFace" },
-                    { text: "۶ پیله‌های شیشه‌ای", callback_data: "getGlassyGuard" }
+                    { text: "۵ دلم برای صورتت تنگ شده", callback_data: "get_song_MissYourFace" },
+                    { text: "۶ پیله‌های شیشه‌ای", callback_data: "get_song_GlassyGuard" }
                 ],[
-                    { text: "۷ آدم معمولی", callback_data: "getOrdinaryPerson" },
-                    { text: "۸ دکتر", callback_data: "getDoctor" }
+                    { text: "۷ آدم معمولی", callback_data: "get_song_OrdinaryPerson" },
+                    { text: "۸ دکتر", callback_data: "get_song_Doctor" }
                 ],[
                     { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
@@ -576,36 +576,36 @@ var music = {
     var afKey = {
             inline_keyboard: [
                 [
-                    { text: "۱ من لعنتی", callback_data: "getBloodyMe" },
-                    { text: "۲ پس من چی", callback_data: "getWhatAboutMe" }
+                    { text: "۱ من لعنتی", callback_data: "get_song_BloodyMe" },
+                    { text: "۲ پس من چی", callback_data: "get_song_WhatAboutMe" }
                 ],[
-                    { text: "۳ فرشته مرگ", callback_data: "getDeathAngle" },
-                    { text: "۴ لازم نبود", callback_data: "getYouDidntHaveTo" }
+                    { text: "۳ فرشته مرگ", callback_data: "get_song_DeathAngle" },
+                    { text: "۴ لازم نبود", callback_data: "get_song_YouDidntHaveTo" }
                 ],[
-                    { text: "۵ زمین", callback_data: "getEarth" },
-                    { text: "۶ شطرنج", callback_data: "getChess" }
+                    { text: "۵ زمین", callback_data: "get_song_Earth" },
+                    { text: "۶ شطرنج", callback_data: "get_song_Chess" }
                 ],[
-                    { text: "۷ گل دلفریب", callback_data: "getFascinatingFlower" },
-                    { text: "۸ سپهر", callback_data: "getSepehr" }
+                    { text: "۷ گل دلفریب", callback_data: "get_song_FascinatingFlower" },
+                    { text: "۸ سپهر", callback_data: "get_song_Sepehr" }
                 ],[
                     { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
                 ]
             ]
     };
-    var afKey = {
+    var ffKey = {
         inline_keyboard: [
             [
-                { text: "۱ اسلحه", callback_data: "getTheGun" },
-                { text: "۲ دلم برای خودم تنگه", callback_data: "getMissMyself" }
+                { text: "۱ اسلحه", callback_data: "get_song_TheGun" },
+                { text: "۲ دلم برای خودم تنگه", callback_data: "get_song_MissMyself" }
             ],[
-                { text: "۳ یعنی چه", callback_data: "getWhatDoesItMean" },
-                { text: "۴ فرشته سرد", callback_data: "getColdAngel" }
+                { text: "۳ یعنی چه", callback_data: "get_song_WhatDoesItMean" },
+                { text: "۴ فرشته سرد", callback_data: "get_song_ColdAngel" }
             ],[
-                { text: "۵ پستچی", callback_data: "getPostman" },
-                { text: "۶ و", callback_data: "getAnd" }
+                { text: "۵ پستچی", callback_data: "get_song_Postman" },
+                { text: "۶ و", callback_data: "get_song_And" }
             ],[
-                { text: "۷ دانشمند", callback_data: "getScientist" },
-                { text: "۸ پایان", callback_data: "getEnding" }
+                { text: "۷ دانشمند", callback_data: "get_song_Scientist" },
+                { text: "۸ پایان", callback_data: "get_song_Ending" }
             ],[
                 { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
             ]
@@ -614,17 +614,17 @@ var music = {
     var cwdKey = {
         inline_keyboard: [
             [
-                { text: "۱ شیمی مصنوعی", callback_data: "getArtificialChemistry" },
-                { text: "۲ ارتباط با کرها", callback_data: "getCommunicationWithTheDeaf" }
+                { text: "۱ شیمی مصنوعی", callback_data: "get_song_ArtificialChemistry" },
+                { text: "۲ ارتباط با کرها", callback_data: "get_song_CommunicationWithTheDeaf" }
             ],[
-                { text: "۳ هارمونی زرد", callback_data: "getYellowHarmony" },
-                { text: "۴ دکمه انفجار", callback_data: "getButtonOfDoom" }
+                { text: "۳ هارمونی زرد", callback_data: "get_song_YellowHarmony" },
+                { text: "۴ دکمه انفجار", callback_data: "get_song_ButtonOfDoom" }
             ],[
-                { text: "۵ اوقیانوس انزوا", callback_data: "getUnderneathTheOcean" },
-                { text: "۶ مردم", callback_data: "getPeople" }
+                { text: "۵ اوقیانوس انزوا", callback_data: "get_song_UnderneathTheOcean" },
+                { text: "۶ مردم", callback_data: "get_song_People" }
             ],[
-                { text: "۷ روح آزاد", callback_data: "getFreeSpirit" },
-                { text: "۸ گناه طبیعت", callback_data: "getNaturesGuilt" }
+                { text: "۷ روح آزاد", callback_data: "get_song_FreeSpirit" },
+                { text: "۸ گناه طبیعت", callback_data: "get_song_NaturesGuilt" }
             ],[
                 { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
             ]
@@ -633,19 +633,19 @@ var music = {
     var vcKey = {
         inline_keyboard: [
             [
-                { text: "۱ فرار آخر", callback_data: "getFinalRun" },
-                { text: "۲ اًٌ منفی", callback_data: "getONegative" }
+                { text: "۱ فرار آخر", callback_data: "get_song_FinalRun" },
+                { text: "۲ اًٌ منفی", callback_data: "get_song_ONegative" }
             ],[
-                { text: "۳ شنود", callback_data: "getEavesdrop" },
-                { text: "۴ شعبده", callback_data: "getJuggle" }
+                { text: "۳ شنود", callback_data: "get_song_Eavesdrop" },
+                { text: "۴ شعبده", callback_data: "get_song_Juggle" }
             ],[
-                { text: "۵ زندگی بسته‌ای", callback_data: "getPackedLife" },
-                { text: "۶ مه تا وضوح", callback_data: "getHazeToCelerity" }
+                { text: "۵ زندگی بسته‌ای", callback_data: "get_song_PackedLife" },
+                { text: "۶ مه تا وضوح", callback_data: "get_song_HazeToCelerity" }
             ],[
-                { text: "۷ گورستان ایستاده", callback_data: "getVerticalcemetry" },
-                { text: "۸ کسی که دوست داشتم باشم", callback_data: "getTheOneILovedToBe" }
+                { text: "۷ گورستان ایستاده", callback_data: "get_song_Verticalcemetry" },
+                { text: "۸ کسی که دوست داشتم باشم", callback_data: "get_song_TheOneILovedToBe" }
             ],[
-                { text: "۹ کجایی‌ام", callback_data: "getWhereIamFrom" }
+                { text: "۹ کجایی‌ام", callback_data: "get_song_WhereIamFrom" }
             ],
             [
                 { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
@@ -655,20 +655,25 @@ var music = {
     var singlesKey = {
         inline_keyboard: [
             [
-                { text: "۱ فرار آخر", callback_data: "getFinalRun" },
-                { text: "۲ اًٌ منفی", callback_data: "getONegative" }
+                { text: "ربان سبز", callback_data: "get_song_GreenRobans" },
+                { text: "رز صحرایی", callback_data: "get_song_DesertRose" }
             ],[
-                { text: "۳ شنود", callback_data: "getEavesdrop" },
-                { text: "۴ شعبده", callback_data: "getJuggle" }
+                { text: "رز مشکی", callback_data: "get_song_BlackRose" },
+                { text: "زاناکس", callback_data: "get_song_Xanax" }
             ],[
-                { text: "۵ زندگی بسته‌ای", callback_data: "getPackedLife" },
-                { text: "۶ مه تا وضوح", callback_data: "getHazeToCelerity" }
+                { text: "اتفاق خوب", callback_data: "get_song_GoodHappening" },
+                { text: "اعتصاب", callback_data: "get_song_strike" }
             ],[
-                { text: "۷ گورستان ایستاده", callback_data: "getVerticalcemetry" },
-                { text: "۸ کسی که دوست داشتم باشم", callback_data: "getTheOneILovedToBe" }
+                { text: "ماشین انتقام", callback_data: "get_song_Revengemachine" },
+                { text: "فواره‌های جیوه‌ای", callback_data: "get_song_MercurialFountains" }
             ],[
-                { text: "۹ کجایی‌ام", callback_data: "getWhereIamFrom" }
+                { text: "هیج چیزی بهتر نمیشه", callback_data: "get_song_NothingWillget_song_Better" }
+            ],[
+                { text: "سیب", callback_data: "get_song_Sib" },
+                { text: "هنوزم", callback_data: "get_song_Hanozam" },
+                { text: "هنوزم", callback_data: "get_song_Hanozam" }
             ],
+            
             [
                 { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
             ]
