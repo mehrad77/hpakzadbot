@@ -24,7 +24,7 @@ bot.onText(/((\/start|start|شروع))\b/,  function (msg, match) {
 bot.on('text',  function (msg, match) {
     var keys =[]
     var title = msg.text;//msg.text.substring(5);
-    console.log(title);
+    console.log("[...][text]==> text: ",title);
     var lyrc = searchObj(songs, title.toLowerCase(),""); out = []; //Always Clear out !
     sent = `لطفا ترانه مورد نظر خود را انتخاب کنید.`;
     lyrc.forEach(function(entry) {
@@ -56,57 +56,113 @@ bot.on('audio',  function (msg, match) {
 
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
+    console.log("[...][callback_query]==> Action: ",action);
     const msg = callbackQuery.message;
     const opts = {
         chat_id: msg.chat.id,
         message_id: msg.message_id,
     };
-    if (/(get)\w+/g.test(action)){
-        let text = music[action.substr(3)];
-        bot.sendAudio(msg.chat.id, text);
-         
+    let text;
+    if (/(get_song_)\w+/g.test(action)){
+        text = action.substr(9);
+        var options = {
+            parse_mode:"HTML",
+            reply_markup: JSON.stringify({
+                inline_keyboard: [[{ text: "📥 دریافت شعر", callback_data: "get_lyrics_"+text }]]
+            })
+        };
+        bot.sendAudio(msg.chat.id, music[text], options);
+        bot.answerCallbackQuery(callbackQuery.id, " ارسال شد.",false);
     }
 
     else if(/(btn_)\w+/g.test(action)){
-        let text = action.substr(4);
+        text = action.substr(4);
         console.log(text);
         switch(text) {
             case "albumfl":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
                 bot.editMessageReplyMarkup(flKey,opts);
-                bot.editMessageText("test", opts);
+                break;
+            case "albumlu":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
+                bot.editMessageReplyMarkup(luKey,opts);
+                break;
+            case "albumdr":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
+                bot.editMessageReplyMarkup(drKey,opts);
+                break;
+            case "albumaf":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
+                bot.editMessageReplyMarkup(afKey,opts);
+                break;
+            case "albumff":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
+                bot.editMessageReplyMarkup(ffKey,opts);
+                break;
+            case "albumcwt":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
+                bot.editMessageReplyMarkup(ctwKey,opts);
+                break;
+            case "albumvc":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
+                bot.editMessageReplyMarkup(vcKey,opts);
+                break;
+            case "albumsingle":
+                //bot.editMessageText("آلبوم سرزمین وحشت", opts);
+                bot.editMessageReplyMarkup(singlesKey,opts);
                 break;
             case "main_Key":
+                //bot.editMessageText(intro, opts);
                 bot.editMessageReplyMarkup(main_Key,opts);
-                bot.editMessageText(intro, opts);
                 break;
             default:
                 console.log("God Damn ERORR!");
         }
+        bot.answerCallbackQuery(callbackQuery.id);
     }
-    
+
+    else if (/(get_lyrics_)\w+/g.test(action)){
+        console.log("get lyric trigerd !")
+        text = action.substr(11);
+        sendLyric(text,opts);
+        bot.answerCallbackQuery(callbackQuery.id, " ارسال شد.",false);
+    }
+
     else {
-        let text = hadi[action];
-        var rply = JSON.stringify({
-            inline_keyboard: [[{ text: "📥 دریافت آهنگ", callback_data: "get"+action }]]
-        });
-        bot.editMessageText(text, opts);
-        bot.editMessageReplyMarkup(rply,opts);
-       
+        text = action;
+        sendEditLyric(action,opts);
+        bot.answerCallbackQuery(callbackQuery.id, " ارسال شد.",false);
     }
     
 
   
-
+    
    
 });
 
     
-
-
+function sendLyric(songID,opts){
+    let text = hadi[songID];
+    var options = {
+        parse_mode:"HTML",
+        reply_markup: JSON.stringify({
+            inline_keyboard: [[{ text: "📥 دریافت آهنگ", callback_data: "get_song_"+songID }]]
+        })
+    };
+    bot.sendMessage(opts.chat_id,text, options);
+}
+function sendEditLyric(songID,opts){
+    let text = hadi[songID];
+    let rply = JSON.stringify({
+        inline_keyboard: [[{ text: "📥 دریافت آهنگ", callback_data: "get_song_"+songID }]]
+    });
+    bot.editMessageText(text, opts);
+    bot.editMessageReplyMarkup(rply,opts);
+}
 
 bot.on("inline_query", (query) => {
     if (query.query != ""){
-        console.log(query);
+        console.log("[...][inline_query]==> query: ",query.query);
         var lyrc = searchObj(songs, query.query.toLowerCase() ,""); out = []; //Always Clear out !
         sent = [];
         lyrc.forEach(function(entry) {
@@ -449,7 +505,8 @@ var music = {
                     { text: "For Four", callback_data: "btn_albumff" },
                     { text: "ارتباط با کرها", callback_data: "btn_albumcwd" }
                 ],[
-                    { text: "گورستان ایستاده", callback_data: "btn_albumvc" }
+                    { text: "گورستان ایستاده", callback_data: "btn_albumvc" },
+                    { text: "تک‌ترانه‌ها", callback_data: "btn_albumsingle" }
                 ],[
                     { text: "فول آرشیو", callback_data: "btn_full" },
                     { text: "آثار متنی", callback_data: "btn_storis" }
@@ -535,8 +592,88 @@ var music = {
                 ]
             ]
     };
-    //var cwdKey = {
-    //var vcKey = {
+    var afKey = {
+        inline_keyboard: [
+            [
+                { text: "۱ اسلحه", callback_data: "getTheGun" },
+                { text: "۲ دلم برای خودم تنگه", callback_data: "getMissMyself" }
+            ],[
+                { text: "۳ یعنی چه", callback_data: "getWhatDoesItMean" },
+                { text: "۴ فرشته سرد", callback_data: "getColdAngel" }
+            ],[
+                { text: "۵ پستچی", callback_data: "getPostman" },
+                { text: "۶ و", callback_data: "getAnd" }
+            ],[
+                { text: "۷ دانشمند", callback_data: "getScientist" },
+                { text: "۸ پایان", callback_data: "getEnding" }
+            ],[
+                { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
+            ]
+        ]
+    };
+    var cwdKey = {
+        inline_keyboard: [
+            [
+                { text: "۱ شیمی مصنوعی", callback_data: "getArtificialChemistry" },
+                { text: "۲ ارتباط با کرها", callback_data: "getCommunicationWithTheDeaf" }
+            ],[
+                { text: "۳ هارمونی زرد", callback_data: "getYellowHarmony" },
+                { text: "۴ دکمه انفجار", callback_data: "getButtonOfDoom" }
+            ],[
+                { text: "۵ اوقیانوس انزوا", callback_data: "getUnderneathTheOcean" },
+                { text: "۶ مردم", callback_data: "getPeople" }
+            ],[
+                { text: "۷ روح آزاد", callback_data: "getFreeSpirit" },
+                { text: "۸ گناه طبیعت", callback_data: "getNaturesGuilt" }
+            ],[
+                { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
+            ]
+        ]
+    };
+    var vcKey = {
+        inline_keyboard: [
+            [
+                { text: "۱ فرار آخر", callback_data: "getFinalRun" },
+                { text: "۲ اًٌ منفی", callback_data: "getONegative" }
+            ],[
+                { text: "۳ شنود", callback_data: "getEavesdrop" },
+                { text: "۴ شعبده", callback_data: "getJuggle" }
+            ],[
+                { text: "۵ زندگی بسته‌ای", callback_data: "getPackedLife" },
+                { text: "۶ مه تا وضوح", callback_data: "getHazeToCelerity" }
+            ],[
+                { text: "۷ گورستان ایستاده", callback_data: "getVerticalcemetry" },
+                { text: "۸ کسی که دوست داشتم باشم", callback_data: "getTheOneILovedToBe" }
+            ],[
+                { text: "۹ کجایی‌ام", callback_data: "getWhereIamFrom" }
+            ],
+            [
+                { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
+            ]
+        ]
+    };
+    var singlesKey = {
+        inline_keyboard: [
+            [
+                { text: "۱ فرار آخر", callback_data: "getFinalRun" },
+                { text: "۲ اًٌ منفی", callback_data: "getONegative" }
+            ],[
+                { text: "۳ شنود", callback_data: "getEavesdrop" },
+                { text: "۴ شعبده", callback_data: "getJuggle" }
+            ],[
+                { text: "۵ زندگی بسته‌ای", callback_data: "getPackedLife" },
+                { text: "۶ مه تا وضوح", callback_data: "getHazeToCelerity" }
+            ],[
+                { text: "۷ گورستان ایستاده", callback_data: "getVerticalcemetry" },
+                { text: "۸ کسی که دوست داشتم باشم", callback_data: "getTheOneILovedToBe" }
+            ],[
+                { text: "۹ کجایی‌ام", callback_data: "getWhereIamFrom" }
+            ],
+            [
+                { text: "🔙 بازگشت", callback_data: "btn_main_Key" }
+            ]
+        ]
+    };
 
 
 
