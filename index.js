@@ -23,15 +23,16 @@ bot.on('text',  function (msg, match) {
     var title = msg.text;
     
         var keys =[]
-        console.log("["+msg.chat.fisrt_name+"][text]==> text: ",title);
+        console.log("["+msg.from.first_name+"|"+msg.from.username+"][text]==> ",title);
         var lyrc = searchObj(songs, title.toLowerCase(),""); out = []; //Always Clear out !
         sent = `لطفا ترانه مورد نظر خود را انتخاب کنید.`;
         lyrc.forEach(function(entry) {
             //sent += '\n\n\n\n'+ hadi[entry];
             keys.push( [{ text: songs[entry][1], callback_data: songs[entry][0] }] );
         });
-        if(!(/((\/start|start|شروع))\b/.test(title))||keys.length <= 0){
+        if(keys.length <= 0){
             sent = `‍نتیجه‌ای برای جست‌و‌جوی شما یافت نشد،برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.`;
+            if((/((\/start|start|شروع))\b/.test(title))) sent = intro;
             bot.sendMessage(msg.chat.id, sent,mainKey);
         }
         else{
@@ -55,7 +56,7 @@ bot.on('audio',  function (msg, match) {
 
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
-    console.log("["+msg.chat.fisrt_name+"][callback_query]==> Action: ",action);
+    console.log("["+callbackQuery.from.first_name+"|"+callbackQuery.from.username+"][callback_query]==> ",action);
     const msg = callbackQuery.message;
     const opts = {
         chat_id: msg.chat.id,
@@ -159,7 +160,7 @@ function sendEditLyric(songID,opts){
 
 bot.on("inline_query", (query) => {
     if (query.query != ""){
-        console.log("["+msg.chat.fisrt_name+"][inline_query]==> query: ",query.query);
+        console.log("["+query.from.first_name+"|"+query.from.username+"][inline_query]==> ",query.query);
         var lyrc = searchObj(songs, query.query.toLowerCase() ,""); out = []; //Always Clear out !
         sent = [];
         lyrc.forEach(function(entry) {
