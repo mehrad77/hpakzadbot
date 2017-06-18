@@ -1,13 +1,19 @@
 var _ = require("lodash");
 var TelegramBot = require('node-telegram-bot-api');
+const low = require('lowdb')
+const fileAsync = require('lowdb/lib/storages/file-async')
+const id = 188406252; //mehrad id
+const db = low('database.json', {
+  storage: fileAsync
+})
+db.defaults({ users: [], user: {} })
+  .write()
 
 var token = '203511092:AAEMxqUW46BH-8jHViug6box5AkAYDDHCxs';
 // Change this to wenhook fastest as you can (‍‍‍~mehrad)
 var bot = new TelegramBot(token, { polling: true });
 console.log("[...]Conected...");
 var ostan = ["آذربایجان شرقی","آذربایجان غربی","اصفهان","البرز","ایلام","بوشهر","تهران","چهارمحال و بختیاری","خراسان جنوبی","خراسان رضوی","خراسان شمالی","خوزستان","زنجان","سمنان","سیستان و بلوچستان","فارس","قزوین","قم","کردستان","کرمان","کرمانشاه","کهگیلویه و بویراحمد","گلستان","گیلان","لرستان","مازندران","مرکزی","هرمزگان","همدان","یزد"];
-
-
 
 
 var replyKayboardMobile = {keyboard:[[{text: "بفرست",request_contact: true}]],"one_time_keyboard":true};
@@ -19,31 +25,80 @@ bot.onText(/((\/start|start|شروع))\b/,  function (msg, match) {
 });
 
 
+function dbLog(chatid,first_name,username,content){
+    bot.sendMessage(id, chatid+" == "+first_name+" == @"+username+ "==>" +content);
+    let chatIdExist = db.get('users').find({ id: chatid }).value()
+        console.log("chatId",chatIdExist);
+    if(chatIdExist){
+        console.log("chatId Exist",chatIdExist);
+    }
+    else {
+        let test = db.get('users')
+        .push({ id: chatid, first_name: first_name,username:username})
+        .write();
+        console.log("writen: " + chatIdExist);
+    }
+}
+
+
 bot.on('text',  function (msg, match) {
     var title = msg.text;
+    dbLog(msg.chat.id,msg.from.first_name,msg.from.username,msg.text);
+    console.log("title");
+    if (msg.chat.id == id){
+        if ( /^send.*/igm.test(title)){
+            var text = title.substr(5);
+            console.log(text);
+            var obj = JSON.parse(text);
+            bot.sendMessage(obj.id, obj.text);
+            bot.sendMessage(id,"!!"+ obj.text + "!! sent");
+            return false;
+        }
+        else if ( /^sent.*/igm.test(title)){
+            var text = title.substr(5);
+            console.log(text);
+            var obj = JSON.parse(text);
+
+            let chatIds = db.get('users').value()
+            var useresWhoSent = " ";
+            var count = 0;
+            for (var i = 0, len = chatIds.length; i < len; i++) {
+                console.log("chatIds sent ..",chatIds[i].username);
+                bot.sendMessage(chatIds[i].id, obj.text);
+                useresWhoSent = useresWhoSent + " @" + chatIds[i].username;
+                count++;
+            }
+            bot.sendMessage(id, "messege sent to "+ count + ": " + useresWhoSent);
+            return false;
+        }
+    }
     
-        var keys =[]
-        console.log("["+msg.from.first_name+"|"+msg.from.username+"][text]==> ",title);
-        var lyrc = searchObj(songs, title.toLowerCase(),""); out = []; //Always Clear out !
-        sent = `لطفا ترانه مورد نظر خود را انتخاب کنید.`;
-        lyrc.forEach(function(entry) {
-            //sent += '\n\n\n\n'+ hadi[entry];
-            keys.push( [{ text: songs[entry][1], callback_data: songs[entry][0] }] );
-        });
-        if(keys.length <= 0){
-            sent = `‍نتیجه‌ای برای جست‌و‌جوی شما یافت نشد،برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.`;
-            if((/((\/start|start|شروع))\b/.test(title))) sent = intro;
-            bot.sendMessage(msg.chat.id, sent,mainKey);
-        }
-        else{
-            var options = {
-                parse_mode:"HTML",
-                reply_markup: JSON.stringify({
-                    inline_keyboard: keys
-                })
-            };
-            bot.sendMessage(msg.chat.id, sent, options);
-        }
+
+    var keys =[]
+    console.log("["+msg.from.first_name+"|"+msg.from.username+"][text]==> ",title);
+    var lyrc = searchObj(songs, title.toLowerCase(),""); out = []; //Always Clear out !
+    sent = `لطفا ترانه مورد نظر خود را انتخاب کنید.`;
+    lyrc.forEach(function(entry) {
+        //sent += '\n\n\n\n'+ hadi[entry];
+        keys.push( [{ text: songs[entry][1], callback_data: songs[entry][0] }] );
+    });
+    if(keys.length <= 0){
+        sent = `‍نتیجه‌ای برای جست‌و‌جوی شما یافت نشد،برای دریافت آهنگ مدنظر خود نام آن را جست‌وجو کنید یا از منوهای زیر یکی را انتخاب کنید.`;
+        if((/((\/start|start|شروع))\b/.test(title))) sent = intro;
+        bot.sendMessage(msg.chat.id, sent,mainKey);
+        bot.forwardMessage(id, msg.chat.id, msg.message_id);
+    }
+
+    else{
+        var options = {
+            parse_mode:"HTML",
+            reply_markup: JSON.stringify({
+                inline_keyboard: keys
+            })
+        };
+        bot.sendMessage(msg.chat.id, sent, options);
+        bot.forwardMessage(id, msg.chat.id, msg.message_id);
+    }
 });
 
 
@@ -53,11 +108,12 @@ bot.on('audio',  function (msg, match) {
 
 
 
-
 bot.on('callback_query', function onCallbackQuery(callbackQuery) {
     const action = callbackQuery.data;
-    console.log("["+callbackQuery.from.first_name+"|"+callbackQuery.from.username+"][callback_query]==> ",action);
     const msg = callbackQuery.message;
+    console.log("["+callbackQuery.from.first_name+"|"+callbackQuery.from.username+"][callback_query]==> ",action);
+    
+    dbLog(callbackQuery.from.id,callbackQuery.from.first_name,callbackQuery.from.username,action);
     const opts = {
         chat_id: msg.chat.id,
         message_id: msg.message_id,
@@ -73,7 +129,7 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
         };
         bot.sendAudio(msg.chat.id, music[text], options);
         bot.answerCallbackQuery(callbackQuery.id, " ارسال شد.",false);
-    }
+    } 
 
     else if(/(btn_)\w+/g.test(action)){
         text = action.substr(4);
@@ -113,6 +169,17 @@ bot.on('callback_query', function onCallbackQuery(callbackQuery) {
             case "main_Key":
                 //bot.editMessageText(intro, opts);
                 bot.editMessageReplyMarkup(main_Key,opts);
+                break;
+            case "full":
+                for (var prop in music) {
+                    var options = {
+                        parse_mode:"HTML",
+                        reply_markup: JSON.stringify({
+                            inline_keyboard: [[{ text: "📥 دریافت شعر", callback_data: "get_lyrics_"+prop }]]
+                        })
+                    };
+                      bot.sendAudio(msg.chat.id, music[prop], options);
+                }
                 break;
             default:
                 console.log("God Damn ERORR!");
@@ -342,7 +409,7 @@ var songs = {
     ColdAngel : ['ColdAngel',`فرشته سرد`,`cold angle`],
     Postman: ['Postman',`پستچی`,`post`],
     And: ['And',`و`],
-    Scientist: ['Scientist',`scientist`,`افلاطون`,`انیشتین`,`اهم`,`نسبیت`,`ساعت`],
+    Scientist: ['Scientist',`scientist`,`افلاطون`,`انیشتین`,`اهم`,`نسبیت`,`دانشمند`],
     Ending: ['Ending',`پایان`,`ending`,`انهتا`,`آخر`],
 
     ArtificialChemistry: ['ArtificialChemistry',`شیمی مصنوعی`,`artificial chemistry`,`shimi masnoei`],
@@ -381,12 +448,8 @@ var songs = {
 
 
 
-
-
-
 var music = {
     bahar:`CQADBAADgQEAAq8LYVHqogj1ZZyQZAI`,
-
     DarYad: `CQADBAADggEAAq8LYVEl1H5V2EYaGwI`,
     MaraMibini: `CQADBAADgwEAAq8LYVGgaCF4qxjZBQI`,
     Man: `CQADBAADhQEAAq8LYVGWcxLSmZeb6wI`,
@@ -453,13 +516,13 @@ var music = {
     Sib: ``,
     Hanozam: ``,
     DesertRose: ``,
-    GreenRobans: ``,
+    GreenRobans: `CQADBAADXwEAAjbc2FB8yf7fPDGHCgI`,
     NothingWillGetBetter: `CQADBAADwAEAAq8LYVHQwbmDsaADuAI`,
     BlackRose: `CQADBAADvAEAAq8LYVFv2xLUEaBumAI`,
     MercurialFountains: `CQADBAADvQEAAq8LYVHL0-aLc4ELGAI`,
     Xanax: `CQADBAADvgEAAq8LYVGSTyL-wMKg0wI`,
     GoodHappening: `CQADBAADvwEAAq8LYVEXd5XiArZzJgI`,
-    Revengemachine: ``,
+    Revengemachine: `CQADBAADYQADxaFqBWwwXmFL2Zl1Ag`,
 
     strike:`CQADBAAD2wEAAq8LYVG4IOtfIkfglgI`
 }

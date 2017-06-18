@@ -12,5 +12,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Mehrad77",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "lowdb": "^0.16.2"
+  }
 }
