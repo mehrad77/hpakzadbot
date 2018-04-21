@@ -1,16 +1,17 @@
+
 var _ = require("lodash");
 var TelegramBot = require('node-telegram-bot-api');
 const low = require('lowdb')
 const fileAsync = require('lowdb/lib/storages/file-async')
-const id = process.env.mehrad_id; //mehrad id
-const zo = process.env.zohreh_id; // zohre id
+const id = 188406252; //mehrad id
+const zo = 90874309; // zohre id
 const db = low('database.json', {
   storage: fileAsync
 })
 db.defaults({ users: [], user: {} })
   .write()
 
-var token = process.env.token;
+var token = "203511092:AAEMxqUW46BH-8jHViug6box5AkAYDDHCxs";
 // Change this to wenhook fastest as you can (‍‍‍~mehrad)
 var bot = new TelegramBot(token, { polling: true });
 console.log("[...]Conected...");
